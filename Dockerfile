@@ -13,6 +13,6 @@ RUN pip install --no-cache-dir pytest
 
 CMD ["python", "-m", "pytest", "-v"]
 
-FROM base AS production
+FROM base AS runtime
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
