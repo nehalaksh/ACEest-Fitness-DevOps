@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ACEest Functional Fitness</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <h1>ACEest FUNCTIONAL FITNESS</h1>
+    </header>
+
+    <main class="layout">
+        <aside class="panel profile">
+            <h2>Client Profile</h2>
+
+            <form action="/" method="get">
+                <label for="program">Select Program:</label>
+
+                <select id="program" name="program" required>
+                    <option value="">Choose a fitness program</option>
+                    {% for name in programs %}
+                    <option value="{{ name }}"
+                        {% if selected == name %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">View Program</button>
+            </form>
+
+            <section class="metrics">
+                <h3>GYM METRICS</h3>
+                <p>CAPACITY: {{ metrics.capacity }}</p>
+                <p>AREA: {{ metrics.area }}</p>
+                <p>BREAK-EVEN: {{ metrics.break_even }}</p>
+            </section>
+        </aside>
+
+        <section class="content">
+            {% if selected %}
+                {% set program = programs[selected] %}
+
+                <section class="panel">
+                    <h2>Weekly Workout Chart</h2>
+                    <h3 class="program-title"
+                        style="color: {{ program.color }}">
+                        {{ selected }}
+                    </h3>
+                    <pre class="workout"
+                         style="--program-color: {{ program.color }}">{{ program.workout }}</pre>
+                </section>
+
+                <section class="panel">
+                    <h2>Daily Nutrition Plan (Tamil Nadu Context)</h2>
+                    <pre class="diet">{{ program.diet }}</pre>
+                </section>
+            {% else %}
+                <section class="panel welcome">
+                    <h2>Welcome to ACEest Fitness &amp; Gym</h2>
+                    <p>Select a fitness program to view its workout
+                       schedule and nutrition plan.</p>
+                </section>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer>
+        ACEest Fitness &amp; Gym · Fitness for every goal
+    </footer>
+</body>
+</html>
