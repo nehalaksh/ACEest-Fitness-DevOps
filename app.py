@@ -74,6 +74,13 @@ def home():
 def health():
     return jsonify({"status": "healthy"}), 200
 
+@app.get("/version")
+def version():
+    return jsonify({
+        "app": "ACEest-Fitness",
+        "version": __version__
+    }), 200
+
 
 @app.get("/api/programs")
 def list_programs():
