@@ -15,27 +15,27 @@ pipeline {
 
         stage('Syntax Check') {
             steps {
-                bat 'py -3.12 -m compileall -q .'
+                bat 'py -3.15 -m compileall -q .'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'py -3.12 -m pip install --upgrade pip'
-                bat 'py -3.12 -m pip install -r requirements.txt'
+                bat 'py -3.15 -m pip install --upgrade pip'
+                bat 'py -3.15 -m pip install -r requirements.txt'
             }
         }
 
         stage('Lint') {
             steps {
-                bat 'py -3.12 -m pip install flake8'
-                bat 'py -3.12 -m flake8 .'
+                bat 'py -3.15 -m pip install flake8'
+                bat 'py -3.15 -m flake8 .'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'py -3.12 -m pytest -v'
+                bat 'py -3.15 -m pytest -v'
             }
         }
 
