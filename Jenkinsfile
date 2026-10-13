@@ -15,7 +15,7 @@ pipeline {
 
         stage('Syntax Check') {
             steps {
-                sh 'py -3.15 -m compileall -q .'
+                sh 'python3 -m compileall -q .'
             }
         }
 
