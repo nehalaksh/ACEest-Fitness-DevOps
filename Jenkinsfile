@@ -15,33 +15,33 @@ pipeline {
 
         stage('Syntax Check') {
             steps {
-                bat 'py -3.15 -m compileall -q .'
+                sh 'py -3.15 -m compileall -q .'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'py -3.15 -m pip install --upgrade pip'
-                bat 'py -3.15 -m pip install -r requirements.txt'
+                sh 'py -3.15 -m pip install --upgrade pip'
+                sh 'py -3.15 -m pip install -r requirements.txt'
             }
         }
 
         stage('Lint') {
             steps {
-                bat 'py -3.15 -m pip install flake8'
-                bat 'py -3.15 -m flake8 .'
+                sh 'py -3.15 -m pip install flake8'
+                sh 'py -3.15 -m flake8 .'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'py -3.15 -m pytest -v'
+                sh 'py -3.15 -m pytest -v'
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t aceest-fitness:latest .'
+                sh 'docker build -t aceest-fitness:latest .'
             }
         }
     }
