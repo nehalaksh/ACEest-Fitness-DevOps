@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -15,27 +14,28 @@ pipeline {
 
         stage('Syntax Check') {
             steps {
+                sh 'python3 --version'
                 sh 'python3 -m compileall -q .'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'py -3.15 -m pip install --upgrade pip'
-                sh 'py -3.15 -m pip install -r requirements.txt'
+                sh 'python3 -m pip install --upgrade pip'
+                sh 'python3 -m pip install -r requirements.txt'
+                sh 'python3 -m pip install flake8 pytest'
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'py -3.15 -m pip install flake8'
-                sh 'py -3.15 -m flake8 .'
+                sh 'python3 -m flake8 .'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'py -3.15 -m pytest -v'
+                sh 'python3 -m pytest -v'
             }
         }
 
