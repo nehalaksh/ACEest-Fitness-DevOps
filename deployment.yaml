@@ -1,0 +1,22 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acest-fitness
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: acest-fitness
+  template:
+    metadata:
+      labels:
+        app: acest-fitness
+    spec:
+      containers:
+        - name: fitness-app
+          image: acest-fitness:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+
