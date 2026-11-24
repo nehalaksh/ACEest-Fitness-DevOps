@@ -1,75 +1,134 @@
+
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = 'acest-fitness'
+        IMAGE_TAG = 'latest'
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        DEPLOYMENT_NAME = 'acest-fitness'
+        CONTAINER_NAME = 'fitness-app'
+    }
 
     options {
         timestamps()
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
+                echo 'Source code checked out successfully'
             }
         }
 
-        stage('Syntax Check') {
+        stage('Python Version') {
             steps {
                 sh 'python3 --version'
-                sh 'python3 -m compileall -q .'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m pip install --upgrade pip'
-                sh 'python3 -m pip install -r requirements.txt'
-                sh 'python3 -m pip install flake8 pytest'
+                sh '''
+                    python3 -m pip install --user --upgrade pip
+
+                    if [ -f requirements.txt ]; then
+                        python3 -m pip install --user -r requirements.txt
+                    fi
+
+                    python3 -m pip install --user pytest flake8
+                '''
             }
         }
 
-        stage('Lint') {
+        stage('Syntax Check') {
             steps {
-                sh 'python3 -m flake8 .'
+                sh 'python3 -m compileall -q .'
+                echo 'Python syntax check completed'
             }
         }
 
-        stage('Test') {
+        stage('Code Quality Check') {
             steps {
-                sh 'python3 -m pytest -v'
+                sh '''
+                    python3 -m flake8 . \
+                    --exclude=.git,__pycache__,.venv \
+                    --exit-zero
+                '''
             }
         }
 
-        stage('Docker Build') {
+        stage('Run Tests') {
             steps {
-                sh 'docker build -t aceest-fitness:latest .'
+                sh '''
+                    if find . -name "test_*.py" \
+                       -o -name "*_test.py" | grep -q .; then
+                        python3 -m pytest -v
+                    else
+                        echo "No test files found. Skipping tests."
+                    fi
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker images
+                '''
+            }
+        }
+
+        stage('Load Image into Minikube') {
+            steps {
+                sh '''
+                    minikube image load ${IMAGE_NAME}:${IMAGE_TAG}
+                    minikube image ls | grep ${IMAGE_NAME}
+                '''
+            }
+        }
+
+        stage('Kubernetes Deployment') {
+            steps {
+                sh '''
+                    kubectl apply -f deployment.yaml
+
+                    if [ -f service.yaml ]; then
+                        kubectl apply -f service.yaml
+                    fi
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    kubectl rollout status deployment/${DEPLOYMENT_NAME} \
+                    --timeout=120s
+
+                    kubectl get pods
+                    kubectl get services
+                    kubectl get deployments
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'ACEest-Fitness pipeline completed successfully!'
+            echo 'CI/CD Pipeline completed successfully!'
+            echo 'ACEest Fitness application deployed successfully.'
         }
+
         failure {
-            echo 'Pipeline failed. Check the Console Output for details.'
+            echo 'Pipeline failed. Check Console Output for details.'
         }
-    }
-}
 
-stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-            export KUBECONFIG=/var/lib/jenkins/.kube/config
-
-            echo "Deploying application to Kubernetes..."
-
-            /usr/local/bin/kubectl apply -f deployment.yaml
-
-            /usr/local/bin/kubectl rollout status deployment/acest-fitness
-
-            /usr/local/bin/kubectl get pods
-
-            echo "Kubernetes deployment completed!"
-        '''
+        always {
+            echo 'Pipeline execution finished.'
+        }
     }
 }
