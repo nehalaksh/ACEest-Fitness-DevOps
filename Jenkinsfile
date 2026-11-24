@@ -55,3 +55,21 @@ pipeline {
         }
     }
 }
+
+stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+            export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+            echo "Deploying application to Kubernetes..."
+
+            /usr/local/bin/kubectl apply -f deployment.yaml
+
+            /usr/local/bin/kubectl rollout status deployment/acest-fitness
+
+            /usr/local/bin/kubectl get pods
+
+            echo "Kubernetes deployment completed!"
+        '''
+    }
+}
